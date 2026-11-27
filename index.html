@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Envelyze — Email HTML QA</title>
+<meta name="description" content="Envelyze: email HTML, inspected before it ships. Formats your template and checks every line against HTML, CSS and email-client rules.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg viewBox='0 0 48 48' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='48' y2='48' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%236d5dfc'/%3E%3Cstop offset='.55' stop-color='%23a855f7'/%3E%3Cstop offset='1' stop-color='%23ec4899'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='48' height='48' rx='13' fill='url(%23g)'/%3E%3Crect x='10.5' y='14' width='25' height='18' rx='3' stroke='%23fff' stroke-width='2.4'/%3E%3Cpath d='m12 16.5 11 8 11-8' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='34.5' cy='32.5' r='7.5' fill='%23fff'/%3E%3Cpath d='m31.2 32.6 2.3 2.3 4.3-4.6' stroke='%2316a34a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+
+  <header class="header">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="envg" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#6d5dfc"/><stop offset=".55" stop-color="#a855f7"/><stop offset="1" stop-color="#ec4899"/></linearGradient></defs><rect width="48" height="48" rx="13" fill="url(#envg)"/><rect x="10.5" y="14" width="25" height="18" rx="3" stroke="#fff" stroke-width="2.4"/><path d="m12 16.5 11 8 11-8" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="34.5" cy="32.5" r="7.5" fill="#fff"/><path d="m31.2 32.6 2.3 2.3 4.3-4.6" stroke="#16a34a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div>
+        <div class="eyebrow">Email HTML QA</div>
+        <h1>Envelyze</h1>
+        <p class="subtitle">Email HTML, inspected before it ships. Paste a template to format it, check every line against HTML, CSS and email-client rules, and jump straight to each finding.</p>
+        <div class="badges">
+          <span class="badge"><i>●</i> Runs in your browser — nothing is uploaded</span>
+          <span class="badge">Outlook &amp; Gmail aware</span>
+          <span class="badge">Line-level findings</span>
+        </div>
+      </div>
+    </div>
+    <div class="kbd-hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> runs the check</div>
+  </header>
+
+  <div class="toolbar">
+    <button class="primary" id="formatBtn" title="Format and check (Ctrl + Enter)">Format &amp; check</button>
+    <button id="copyBtn">Copy output</button>
+    <button id="downloadBtn">Download .html</button>
+    <button id="copyReportBtn">Copy report</button>
+    <button id="openBtn">Open file</button>
+    <button id="clearBtn" class="danger">Clear</button>
+
+    <input type="file" id="fileInput" accept=".html,.htm,.txt" hidden>
+
+    <span class="seg">
+      Indent
+      <select id="indentSelect" aria-label="Indent size">
+        <option value="2">2 spaces</option>
+        <option value="4">4 spaces</option>
+        <option value="tab">Tab</option>
+      </select>
+    </span>
+
+    <span class="seg">
+      Theme
+      <select id="themeSelect" aria-label="Colour theme">
+        <option value="soft">Aurora</option>
+        <option value="warm">Sunrise</option>
+        <option value="dark">Midnight</option>
+      </select>
+    </span>
+  </div>
+
+  <details class="settings" id="settings">
+    <summary>
+      <span class="settings-title">Check settings</span>
+      <span class="settings-meta" id="settingsMeta"></span>
+      <span class="settings-toggle"></span>
+    </summary>
+
+    <div class="settings-body" id="toggles">
+      <div class="setting-group">
+        <div class="setting-head">Automatic fixes</div>
+        <div class="toggles">
+          <label class="check"><input type="checkbox" id="optAutofix" checked> Apply fixes</label>
+          <label class="check"><input type="checkbox" id="optTableAttrs" checked> Table attributes</label>
+          <label class="check"><input type="checkbox" id="optRequireBorder" checked> Require border="0"</label>
+          <label class="check"><input type="checkbox" id="optWidthSync" checked> Width attr &harr; style</label>
+          <label class="check"><input type="checkbox" id="optHeightSync"> Height attr &harr; style</label>
+          <label class="check"><input type="checkbox" id="optForceWidthFix"> Force px/% width fixes</label>
+          <label class="check"><input type="checkbox" id="optEmptyAttrs" checked> Remove empty attributes</label>
+          <label class="check"><input type="checkbox" id="optUnusedClasses" checked> Remove unused classes</label>
+          <label class="check"><input type="checkbox" id="optShortenCss"> Shorten CSS values</label>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <div class="setting-head">Checks</div>
+        <div class="toggles">
+          <label class="check"><input type="checkbox" id="optHtmlValidation" checked> HTML validation</label>
+          <label class="check"><input type="checkbox" id="optCssValidation" checked> CSS validation</label>
+          <label class="check"><input type="checkbox" id="optBestPractice" checked> Email best practice</label>
+          <label class="check"><input type="checkbox" id="optAsciiCheck" checked> ASCII checker</label>
+          <label class="check"><input type="checkbox" id="optDuplicateProps" checked> Duplicate properties</label>
+          <label class="check"><input type="checkbox" id="optMediaSync" checked> Match @media blocks</label>
+          <label class="check"><input type="checkbox" id="optCrossMedia" checked> Compare across breakpoints</label>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <div class="setting-head">Output</div>
+        <div class="toggles">
+          <label class="check"><input type="checkbox" id="optExpandConditionals" checked> Expand Outlook conditionals</label>
+          <label class="check"><input type="checkbox" id="optEncodeChars"> Encode special characters</label>
+          <button type="button" class="link-btn" id="resetSettings">Reset to defaults</button>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <main class="workspace">
+    <section class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Input HTML</div>
+        <div class="meta" id="inputMeta">0 characters</div>
+      </div>
+      <textarea id="input" spellcheck="false" placeholder="Paste your email HTML here, or drop an .html file on this pane..."></textarea>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Formatted HTML</div>
+        <div class="legend" aria-hidden="true">
+          <span><i class="mk error"></i>Error</span>
+          <span><i class="mk warn"></i>Review</span>
+          <span><i class="mk fix"></i>Fixed</span>
+        </div>
+        <div class="meta" id="outputMeta">0 characters</div>
+      </div>
+      <pre id="output"></pre>
+    </section>
+  </main>
+
+  <section class="report" id="report">
+    <div class="report-head">
+      <div class="verdict" id="verdict" data-state="idle">
+        <span class="verdict-icon" aria-hidden="true"></span>
+        <div>
+          <div class="verdict-title" id="verdictTitle">Paste HTML to start</div>
+          <div class="report-sub" id="reportSub">Run a format to see the results.</div>
+        </div>
+      </div>
+      <div class="summary" id="summary"></div>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="report-tools">
+      <input type="search" class="search" id="reportSearch" placeholder="Filter findings by text, tag or class...">
+      <div class="filters" id="filters">
+        <button class="chip on" data-filter="all">All</button>
+        <button class="chip" data-filter="error">Errors</button>
+        <button class="chip" data-filter="warn">Review</button>
+        <button class="chip" data-filter="info">Notes</button>
+      </div>
+      <span class="seg">
+        Category
+        <select id="groupFilter" aria-label="Filter by category">
+          <option value="all">All categories</option>
+        </select>
+      </span>
+      <span class="line-filter" id="lineFilter" hidden>
+        <span id="lineFilterText"></span>
+        <button type="button" id="lineFilterClear" aria-label="Show all lines">&times;</button>
+      </span>
+      <label class="check"><input type="checkbox" id="optShowDetails"> Show details</label>
+    </div>
+
+    <div class="report-grid">
+      <div class="report-col col-open">
+        <div class="col-head">
+          <span class="dot warn"></span>
+          <span>Needs your attention</span>
+          <span class="count" id="openCount">0</span>
+        </div>
+        <div class="report-body" id="reportOpen"></div>
+      </div>
+
+      <div class="report-col col-fixed">
+        <div class="col-head">
+          <span class="dot fix"></span>
+          <span>Fixed</span>
+          <span class="count" id="fixedCount">0</span>
+        </div>
+        <div class="report-body" id="reportFixed"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="report chars" id="charsPanel">
+    <div class="report-head">
+      <div>
+        <div class="panel-title">Special characters</div>
+        <div class="report-sub">Every special character in this email, how often it appears, and the code to paste in its place.</div>
+      </div>
+      <button id="copyCharsBtn" class="small" title="Copy the whole table — paste it into Excel or Google Sheets">Copy list</button>
+    </div>
+
+    <div class="char-cards" id="charFilters"></div>
+
+    <div class="char-callout" id="charCallout" data-tone="idle">
+      <span class="callout-text" id="charCalloutText">Run a check to list the special characters.</span>
+      <button id="encodeAllBtn" class="small primary" hidden>Encode them in the output</button>
+    </div>
+
+    <div class="chars-body">
+      <table class="chars-table">
+        <thead>
+          <tr>
+            <th title="The character and its official name">Character</th>
+            <th title="Whether you need to do anything">Status</th>
+            <th class="num" title="How many times it appears in this email">In this email</th>
+            <th title="The code to write instead of the character — click to copy">Paste this</th>
+            <th title="Where it appears — click a line number to jump there">Where</th>
+          </tr>
+        </thead>
+        <tbody id="charsTable"></tbody>
+      </table>
+      <div class="empty-state" id="charsEmpty">No special characters yet — run a check.</div>
+    </div>
+  </section>
+
+  <div class="footer">
+    <div class="status" id="status">Ready.</div>
+    <div>Click any line chip to jump to that line, or a marked line number to see its findings. Outlook conditionals, VML and ghost tables are preserved.</div>
+  </div>
+
+  <div class="footer">
+    <div class="status credit" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border:1px solid rgba(67,88,214,.18);border-radius:999px;background:rgba(255,255,255,.65);box-shadow:0 4px 14px rgba(30,50,100,.08);font-size:12px;font-weight:500;color:#64748b;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">Developed by <a href="https://abhisheket.com" title="Abhishek E T" target="_blank" style="color:#4358d6;text-decoration:none;font-weight:700;letter-spacing:.2px;">Abhishek E T</a></div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+<script src="javascript.js"></script>
+</body>
+</html>
